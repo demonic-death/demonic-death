@@ -25,6 +25,13 @@ height:100%;
 z-index:-1;
 }
 
+/* CORRECCION DEL CANVAS */
+#fire{
+width:100%;
+height:100%;
+display:block;
+}
+
 header{
 font-size:45px;
 padding:30px;
@@ -252,16 +259,11 @@ return;
 
 let guildID = data.guilds[0].Id;
 
-/* info gremio */
-
 let guildInfo = await fetch("https://gameinfo.albiononline.com/api/gameinfo/guilds/"+guildID);
 let guild = await guildInfo.json();
 
 document.getElementById("miembros").innerText =
 "Miembros actuales: "+guild.NumMembers;
-
-
-/* miembros */
 
 let membersRequest = await fetch("https://gameinfo.albiononline.com/api/gameinfo/guilds/"+guildID+"/members");
 let members = await membersRequest.json();
@@ -288,7 +290,6 @@ tabla.innerHTML += `
 }catch(error){
 
 document.getElementById("miembros").innerText="Error al cargar datos";
-
 console.log(error);
 
 }
@@ -300,4 +301,4 @@ obtenerGuild();
 </script>
 
 </body>
-</html>
+  </html>
