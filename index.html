@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+<meta charset="UTF-8">
+<title>DEMONIC DEATH Guild</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial;
+background:black;
+color:white;
+text-align:center;
+overflow-x:hidden;
+}
+
+.fire{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+z-index:-1;
+}
+
+header{
+font-size:45px;
+padding:30px;
+color:#ff3c00;
+text-shadow:0 0 25px red;
+}
+
+.logo{
+width:250px;
+border-radius:20px;
+box-shadow:0 0 25px red;
+}
+
+.seccion{
+max-width:900px;
+margin:auto;
+padding:25px;
+}
+
+.boton{
+display:inline-block;
+padding:16px 30px;
+font-size:20px;
+background:#ff3c00;
+color:white;
+text-decoration:none;
+border-radius:10px;
+margin-top:20px;
+transition:0.3s;
+}
+
+.boton:hover{
+background:red;
+transform:scale(1.08);
+}
+
+.tabla{
+margin:auto;
+border-collapse:collapse;
+width:80%;
+}
+
+.tabla td,.tabla th{
+border:1px solid #444;
+padding:10px;
+}
+
+.tabla th{
+background:#ff3c00;
+}
+
+footer{
+margin-top:40px;
+padding:20px;
+background:#000;
+color:#777;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="fire">
+<canvas id="fire"></canvas>
+</div>
+
+<header>
+⚔️ DEMONIC DEATH ⚔️
+</header>
+
+<img src="logo.png" class="logo">
+
+<div class="seccion">
+
+<h2>👥 Miembros del gremio</h2>
+<p id="miembros">Cargando...</p>
+
+</div>
+
+<div class="seccion">
+
+<h2>🔥 Actividades del gremio</h2>
+
+<p>
+⚔️ Mazmorras grupales<br>
+🌑 Zona Negra (principalmente)<br>
+🟡 Zona Amarilla y Roja<br>
+🏰 Estáticas<br>
+🐾 Rastreo<br>
+🛡️ Guerra de facciones<br>
+🎯 Eventos y premios
+</p>
+
+<a class="boton" href="https://discord.gg/etRWmgdyhE" target="_blank">
+UNIRSE AL DISCORD
+</a>
+
+</div>
+
+<div class="seccion">
+
+<h2>🏆 Top jugadores del gremio</h2>
+
+<table class="tabla">
+
+<thead>
+<tr>
+<th>Jugador</th>
+<th>Fama total</th>
+</tr>
+</thead>
+
+<tbody id="tablaJugadores">
+<tr>
+<td>Cargando...</td>
+<td>...</td>
+</tr>
+</tbody>
+
+</table>
+
+</div>
+
+<div class="seccion">
+
+<h2>💬 Discord del gremio</h2>
+
+<iframe 
+src="https://discord.com/widget?id=1456554581361164440&theme=dark"
+width="350"
+height="500"
+frameborder="0">
+</iframe>
+
+</div>
+
+<footer>
+Guild DEMONIC DEATH | Albion Online
+</footer>
+
+<audio autoplay loop>
+<source src="musica.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+
+/* FUEGO ANIMADO */
+
+const canvas = document.getElementById("fire");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particles=[];
+
+class Particle{
+
+constructor(){
+this.x=Math.random()*canvas.width;
+this.y=canvas.height;
+this.size=Math.random()*6+2;
+this.speedY=Math.random()*-3-1;
+this.speedX=Math.random()*2-1;
+this.life=100;
+}
+
+update(){
+this.x+=this.speedX;
+this.y+=this.speedY;
+this.life--;
+}
+
+draw(){
+ctx.fillStyle="rgba(255,"+Math.floor(Math.random()*150)+",0,0.8)";
+ctx.beginPath();
+ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+ctx.fill();
+}
+
+}
+
+function animateFire(){
+
+ctx.fillStyle="rgba(0,0,0,0.2)";
+ctx.fillRect(0,0,canvas.width,canvas.height);
+
+if(particles.length<120){
+particles.push(new Particle());
+}
+
+particles.forEach((p,i)=>{
+
+p.update();
+p.draw();
+
+if(p.life<=0){
+particles.splice(i,1);
+}
+
+});
+
+requestAnimationFrame(animateFire);
+
+}
+
+animateFire();
+
+
+/* API ALBION */
+
+async function obtenerGuild(){
+
+try{
+
+let search = await fetch("https://gameinfo.albiononline.com/api/gameinfo/search?q=DEMONIC%20DEATH");
+let data = await search.json();
+
+if(!data.guilds || data.guilds.length === 0){
+document.getElementById("miembros").innerText="Gremio no encontrado";
+return;
+}
+
+let guildID = data.guilds[0].Id;
+
+/* info gremio */
+
+let guildInfo = await fetch("https://gameinfo.albiononline.com/api/gameinfo/guilds/"+guildID);
+let guild = await guildInfo.json();
+
+document.getElementById("miembros").innerText =
+"Miembros actuales: "+guild.NumMembers;
+
+
+/* miembros */
+
+let membersRequest = await fetch("https://gameinfo.albiononline.com/api/gameinfo/guilds/"+guildID+"/members");
+let members = await membersRequest.json();
+
+members.sort((a,b)=>b.Fame-a.Fame);
+
+let top = members.slice(0,5);
+
+let tabla=document.getElementById("tablaJugadores");
+
+tabla.innerHTML="";
+
+top.forEach(player=>{
+
+tabla.innerHTML += `
+<tr>
+<td>${player.Name}</td>
+<td>${player.Fame.toLocaleString()}</td>
+</tr>
+`;
+
+});
+
+}catch(error){
+
+document.getElementById("miembros").innerText="Error al cargar datos";
+
+console.log(error);
+
+}
+
+}
+
+obtenerGuild();
+
+</script>
+
+</body>
+</html>
