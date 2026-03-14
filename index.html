@@ -42,6 +42,7 @@ text-shadow:0 0 25px red;
 width:250px;
 border-radius:20px;
 box-shadow:0 0 25px red;
+margin-bottom:20px;
 }
 
 .seccion{
@@ -107,7 +108,7 @@ color:#777;
 
 <div class="seccion">
 <h2>👥 Miembros del gremio</h2>
-<p id="miembros">Cargando...</p>
+<p id="miembros">Cargando datos del gremio...</p>
 </div>
 
 <div class="seccion">
@@ -145,8 +146,7 @@ UNIRSE AL DISCORD
 
 <tbody id="tablaJugadores">
 <tr>
-<td>Cargando...</td>
-<td>...</td>
+<td colspan="2">Cargando jugadores...</td>
 </tr>
 </tbody>
 
@@ -157,7 +157,7 @@ UNIRSE AL DISCORD
 
 <div class="seccion">
 
-<h2>🔥 Ranking semanal</h2>
+<h2>🔥 Ranking del gremio</h2>
 
 <table class="tabla">
 
@@ -208,8 +208,13 @@ Guild DEMONIC DEATH | Albion Online
 const canvas = document.getElementById("fire");
 const ctx = canvas.getContext("2d");
 
+function resizeCanvas(){
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
+}
+
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
 
 let particles=[];
 
@@ -275,16 +280,32 @@ try{
 
 let guildID = "drDX-HjjTemmDAabpy97rQ";
 
-let guildInfo = await fetch("https://gameinfo.albiononline.com/api/gameinfo/guilds/"+guildID);
+/* API CORRECTA */
+
+let guildInfo = await fetch("https://gameinfo-ams.albiononline.com/api/gameinfo/guilds/"+guildID);
+
+if(!guildInfo.ok) throw new Error("Error API");
+
 let guild = await guildInfo.json();
 
 document.getElementById("miembros").innerText =
 "Miembros actuales: "+guild.NumMembers;
 
-let membersRequest = await fetch("https://gameinfo.albiononline.com/api/gameinfo/guilds/"+guildID+"/members");
+
+/* MIEMBROS */
+
+let membersRequest = await fetch("https://gameinfo-ams.albiononline.com/api/gameinfo/guilds/"+guildID+"/members");
+
+if(!membersRequest.ok) throw new Error("Error API miembros");
+
 let members = await membersRequest.json();
 
+/* ORDENAR POR FAMA */
+
 members.sort((a,b)=>b.Fame-a.Fame);
+
+
+/* TOP 5 */
 
 let top = members.slice(0,5);
 
@@ -304,7 +325,7 @@ tabla.innerHTML += `
 });
 
 
-/* RANKING SEMANAL */
+/* RANKING */
 
 let ranking = members.slice(0,10);
 
@@ -327,8 +348,15 @@ tablaRanking.innerHTML += `
 
 }catch(error){
 
-document.getElementById("miembros").innerText="Error al cargar datos";
-console.log(error);
+document.getElementById("miembros").innerText="⚠️ No se pudo cargar la información del gremio";
+
+document.getElementById("tablaJugadores").innerHTML=
+"<tr><td colspan='2'>Error cargando jugadores</td></tr>";
+
+document.getElementById("rankingSemanal").innerHTML=
+"<tr><td colspan='3'>Error cargando ranking</td></tr>";
+
+console.error(error);
 
 }
 
