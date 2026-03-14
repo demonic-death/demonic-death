@@ -25,7 +25,6 @@ height:100%;
 z-index:-1;
 }
 
-/* CORRECCION DEL CANVAS */
 #fire{
 width:100%;
 height:100%;
@@ -107,10 +106,8 @@ color:#777;
 <img src="logo.png" class="logo">
 
 <div class="seccion">
-
 <h2>👥 Miembros del gremio</h2>
 <p id="miembros">Cargando...</p>
-
 </div>
 
 <div class="seccion">
@@ -119,7 +116,7 @@ color:#777;
 
 <p>
 ⚔️ Mazmorras grupales<br>
-🌑 Zona Negra (principalmente)<br>
+🌑 Zona Negra<br>
 🟡 Zona Amarilla y Roja<br>
 🏰 Estáticas<br>
 🐾 Rastreo<br>
@@ -156,6 +153,32 @@ UNIRSE AL DISCORD
 </table>
 
 </div>
+
+
+<div class="seccion">
+
+<h2>🔥 Ranking semanal</h2>
+
+<table class="tabla">
+
+<thead>
+<tr>
+<th>Puesto</th>
+<th>Jugador</th>
+<th>Fama</th>
+</tr>
+</thead>
+
+<tbody id="rankingSemanal">
+<tr>
+<td colspan="3">Cargando ranking...</td>
+</tr>
+</tbody>
+
+</table>
+
+</div>
+
 
 <div class="seccion">
 
@@ -243,21 +266,14 @@ requestAnimationFrame(animateFire);
 animateFire();
 
 
-/* API ALBION */
+
+/* API DEL GREMIO */
 
 async function obtenerGuild(){
 
 try{
 
-let search = await fetch("https://gameinfo.albiononline.com/api/gameinfo/search?q=DEMONIC%20DEATH");
-let data = await search.json();
-
-if(!data.guilds || data.guilds.length === 0){
-document.getElementById("miembros").innerText="Gremio no encontrado";
-return;
-}
-
-let guildID = data.guilds[0].Id;
+let guildID = "drDX-HjjTemmDAabpy97rQ";
 
 let guildInfo = await fetch("https://gameinfo.albiononline.com/api/gameinfo/guilds/"+guildID);
 let guild = await guildInfo.json();
@@ -287,6 +303,28 @@ tabla.innerHTML += `
 
 });
 
+
+/* RANKING SEMANAL */
+
+let ranking = members.slice(0,10);
+
+let tablaRanking = document.getElementById("rankingSemanal");
+
+tablaRanking.innerHTML="";
+
+ranking.forEach((player,index)=>{
+
+tablaRanking.innerHTML += `
+<tr>
+<td>${index+1}</td>
+<td>${player.Name}</td>
+<td>${player.Fame.toLocaleString()}</td>
+</tr>
+`;
+
+});
+
+
 }catch(error){
 
 document.getElementById("miembros").innerText="Error al cargar datos";
@@ -301,4 +339,4 @@ obtenerGuild();
 </script>
 
 </body>
-  </html>
+</html>
